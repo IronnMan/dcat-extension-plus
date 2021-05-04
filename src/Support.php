@@ -94,6 +94,47 @@ class Support
         ]);
     }
 
+    /**
+     * 复写菜单栏
+     */
+    public function injectSidebar()
+    {
+        if (admin_setting('sidebar_indentation')) {
+            admin_inject_section(Admin::SECTION['LEFT_SIDEBAR_MENU'], function () {
+                $menuModel = config('admin.database.menu_model');
+
+                $builder = Admin::menu();
+
+                $html = '';
+                foreach (Helper::buildNestedArray((new $menuModel())->allNodes()) as $item) {
+                    $html .= view(self::menu_view(), ['item' => $item, 'builder' => $builder])->render();
+                }
+
+                return $html;
+            });
+        }
+    }
+
+    public function injectFields()
+    {
+        if (admin_setting('field_select_create')) {
+            Form::extend('selectCreate', SelectCreate::class);
+        }
+    }
+
+    public function footerRemove()
+    {
+        if (admin_setting('footer_remove')) {
+            Admin::style(
+                <<<CSS
+.main-footer {
+    display: none;
+}
+CSS
+            );
+        }
+    }
+
     public function gridRowActionsRight()
     {
         if (admin_setting('grid_row_actions_right')) {
